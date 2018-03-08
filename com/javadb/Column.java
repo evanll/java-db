@@ -2,8 +2,7 @@ package com.javadb;
 
 /**
  * A column in a table.
- * Currently holds only it's name but later can be used to add PK, Constraints, Data Types.
- * TODO: Add primary key functionality
+ * Currently holds only it's name but later can be used to add Constraints, Data Types.
  */
 public class Column {
     private String name;
