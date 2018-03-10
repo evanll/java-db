@@ -1,5 +1,7 @@
 package com.javadb;
 
+import java.util.Arrays;
+
 /**
  * A record in the database.
  * The values of a record are stored in a simple array.
@@ -48,5 +50,12 @@ public class Record {
             System.out.print(s + ",");
         }
         System.out.println();
+    }
+
+    @Override
+    public String toString() {
+        return "Record{" +
+                "values=" + Arrays.toString(values) +
+                '}';
     }
 }
