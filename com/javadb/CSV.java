@@ -6,18 +6,18 @@ import java.util.List;
 /**
  * A utility class that handles CSV formatting and parsing.
  * Although it works for the most common CSV formats, it does not follow
- * a specific CSV standard. It's build for the current requirements
+ * a specific CSV standard. It's build for the specific requirements
  * of the java-db project.
  */
 public class CSV {
     private static final char DELIMITER_CHAR = ',';
     private static final char QUOTES_CHAR = '"';
-    // Todo: Platform Independent \n \r\n
-    private static final String NEWLINE_CHAR = "\n";
+    // Todo: \n \r\n
+    private static final char NEWLINE_CHAR = '\n';
 
     /**
      * Parses a CSV line and returns an array of values.
-     * @param CSVline A raw CSV line.
+     * @param CSVline A raw CSV line to be split into values.
      * @return A String[] that contains the extracted values.
      */
     public static String[] parseCSVline(String CSVline) {
@@ -27,7 +27,7 @@ public class CSV {
         char[] x = CSVline.toCharArray();
         char c;
         boolean inQuotes = false;
-        for(int i = 0; i < x.length - NEWLINE_CHAR.length(); i++) { // because the last chars are a newline
+        for(int i = 0; i < x.length; i++) {
             c = x[i];
             if (!inQuotes) {
                 if (c == DELIMITER_CHAR) {
@@ -35,7 +35,7 @@ public class CSV {
                     sb.setLength(0);
                 } else if (c == QUOTES_CHAR) {
                     inQuotes = true;
-                } else {
+                } else if (c != NEWLINE_CHAR){
                     sb.append(c);
                 }
             } else {
@@ -65,14 +65,14 @@ public class CSV {
      * Values that contain double quotes are wrapped in double quotes
      * and the double quotes are escaped using a preceding double quote.
      * Ex: He said "Hi" -> ...,"He said ""Hi""",...
-     * @param values An array of values.
+     * @param values An array of values to be converted to CSV record.
      * @return A string containing a CSV record.
      */
-    public static String generateCSVRecord(List<String> values) {
+    public static String generateCSVRecord(String[] values) {
         StringBuilder sb = new StringBuilder();
 
-        for(int i = 0; i < values.size(); i++) {
-            String value = values.get(i);
+        for(int i = 0; i < values.length; i++) {
+            String value = values[i];
 
             if (containsSpecialChar(value)) {
                 sb.append(handleSpecialChar(value));
@@ -81,7 +81,7 @@ public class CSV {
             }
 
             // Add delimeter if not the final value
-            if (i != values.size() -1) {
+            if (i != values.length -1) {
                 sb.append(DELIMITER_CHAR);
             }
         }
@@ -156,11 +156,11 @@ public class CSV {
         String val2 = "kl \"m\"";
         String val3 = "Dear,\n How";
 
-        List<String> values = new ArrayList<>();
-        values.add(val0);
-        values.add(val1);
-        values.add(val2);
-        values.add(val3);
+        String[] values = new String[4];
+        values[0] = val0;
+        values[1] = val1;
+        values[2] = val2;
+        values[3] = val3;
 
         String CSVrecord = generateCSVRecord(values);
         String expectedOutput = "abc,\"zy,x\",\"kl \"\"m\"\"\",\"Dear,\n How\"\n";
@@ -176,13 +176,13 @@ public class CSV {
         String val4 = "I like pizza, hamburger and tortilla.";
         String val5 = "Not much to say\n I love cats!";
 
-        List<String> values = new ArrayList<>();
-        values.add(val0);
-        values.add(val1);
-        values.add(val2);
-        values.add(val3);
-        values.add(val4);
-        values.add(val5);
+        String[] values = new String[4];
+        values[0] = val0;
+        values[1] = val1;
+        values[2] = val2;
+        values[3] = val3;
+        values[4] = val4;
+        values[5] = val5;
 
         // Test CSV generator
         String CSVrecord = generateCSVRecord(values);

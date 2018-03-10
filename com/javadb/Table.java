@@ -1,6 +1,8 @@
 package com.javadb;
 
 import java.util.*;
+import java.util.stream.Stream;
+
 /**
  * A table class that holds columns and records.
  * Columns are stored in an ArrayList.
@@ -8,22 +10,50 @@ import java.util.*;
  * Includes single and bulk table operations by key.
  */
 public class Table {
+    private String name;
     private List<Column> columns;
     private Map<Integer, Record> records;
 
-
-    Table(Column... columns) {
+    Table(String name, Column... columns) {
+        this.name = name;
         this.columns = new ArrayList<>();
         this.columns.addAll(Arrays.asList(columns));
 
         records = new LinkedHashMap<>();
     }
 
-    public int getColumns() {
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * @return A copy of the table's columns.
+     */
+    public Column[] getColumns() {
+        return columns.toArray(new Column[columns.size()]);
+    }
+
+    /**
+     * The underlying Map that stores the records cannot be exposed directly.
+     * A stream of key/value pairs is prefered over a deep copy, for ease of
+     * use and efficiency.
+     * @return A stream of Map.Entry<Integer, Record>
+     */
+    public Stream<Map.Entry<Integer, Record>> getRows() {
+        return records.entrySet().stream();
+    }
+
+    /**
+     * @return The number of columns.
+     */
+    public int columns() {
         return columns.size();
     }
 
-    public int getRows() {
+    /**
+     * @return The number of rows.
+     */
+    public int rows() {
         return records.size();
     }
 
@@ -92,7 +122,7 @@ public class Table {
             return false;
         }
 
-        records.put(getRows(), r);
+        records.put(rows(), r);
         return true;
     }
 
@@ -121,7 +151,7 @@ public class Table {
     }
 
     public boolean update(int key, int colIndex, String newValue) {
-        if (colIndex < 0 || colIndex >= getColumns()) {
+        if (colIndex < 0 || colIndex >= columns()) {
             throw new IndexOutOfBoundsException();
         }
 
@@ -135,7 +165,7 @@ public class Table {
     }
 
     public void update(Set<Integer> keys, int colIndex, String newValue) {
-        if (colIndex < 0 || colIndex >= getColumns()) {
+        if (colIndex < 0 || colIndex >= columns()) {
             throw new IndexOutOfBoundsException();
         }
 
@@ -179,8 +209,8 @@ public class Table {
         Column c1 = new Column("Last_Name");
         Column c2 = new Column("County");
 
-        Table t1 = new Table(c0, c1, c2);
-        assert(t1.getColumns() == 3);
+        Table t1 = new Table("t1", c0, c1, c2);
+        assert(t1.columns() == 3);
 
         // Add records
         Record r0 = new Record("Angela", "Walker", "Bristol");
@@ -188,11 +218,11 @@ public class Table {
         Record r2 = new Record("Paul", "Hudson", "Manchester");
         Record r3 = new Record("Hannah", "Powell", "Essex");
         t1.insert(r0,r1,r2,r3);
-        assert(t1.getRows() == 4);
+        assert(t1.rows() == 4);
 
         // Truncate Table
         t1.truncate();
-        assert(t1.getRows() == 0);
+        assert(t1.rows() == 0);
     }
 
     public static void test_insertion() {
@@ -200,8 +230,8 @@ public class Table {
         Column c1 = new Column("Last_Name");
         Column c2 = new Column("County");
 
-        Table t1 = new Table(c0,c1,c2);
-        assert(t1.getColumns() == 3);
+        Table t1 = new Table("t1", c0,c1,c2);
+        assert(t1.columns() == 3);
 
         // Add records
         Record r0 = new Record("Angela", "Walker", "Bristol");
@@ -209,17 +239,17 @@ public class Table {
         Record r2 = new Record("Paul", "Hudson", "Manchester");
         Record r3 = new Record("Hannah", "Powell", "Essex");
         t1.insert(r0,r1,r2,r3);
-        assert(t1.getRows() == 4);
+        assert(t1.rows() == 4);
 
         //Incompatible Record Insertion
 
         // Record with less columns than table
         t1.insert(new Record("Helen", "Knight"));
-        assert(t1.getRows() == 4);
+        assert(t1.rows() == 4);
 
         // Record with more columns than table
         t1.insert(new Record("Albert", "Grey", "London", "Lawyer"));
-        assert(t1.getRows() == 4);
+        assert(t1.rows() == 4);
     }
 
     public static void test_selection() {
@@ -227,8 +257,8 @@ public class Table {
         Column c1 = new Column("Last_Name");
         Column c2 = new Column("County");
 
-        Table t1 = new Table(c0,c1,c2);
-        assert(t1.getColumns() == 3);
+        Table t1 = new Table("t1", c0,c1,c2);
+        assert(t1.columns() == 3);
 
         Record r0 = new Record("Angela", "Walker", "Bristol");
         Record r1 = new Record("Tom", "Olson", "London");
@@ -236,7 +266,7 @@ public class Table {
         Record r3 = new Record("Hannah", "Powell", "Essex");
 
         t1.insert(r0,r1,r2,r3);
-        assert(t1.getRows() == 4);
+        assert(t1.rows() == 4);
 
         // Select Record
         assert(t1.select_record(0) == r0);
@@ -260,7 +290,7 @@ public class Table {
         assert(selection2.contains(r3));
 
         // Check that table is not modified
-        assert(t1.getRows() == 4);
+        assert(t1.rows() == 4);
     }
 
     public static void test_update() {
@@ -269,8 +299,8 @@ public class Table {
         Column c2 = new Column("County");
 
         // Single Row Update
-        Table t1 = new Table(c0,c1,c2);
-        assert(t1.getColumns() == 3);
+        Table t1 = new Table("t1",c0,c1,c2);
+        assert(t1.columns() == 3);
 
         // Add records
         Record r0 = new Record("Angela", "Walker", "Bristol");
@@ -278,14 +308,14 @@ public class Table {
         Record r2 = new Record("Paul", "Hudson", "Manchester");
         Record r3 = new Record("Hannah", "Powell", "Essex");
         t1.insert(r0,r1,r2,r3);
-        assert(t1.getRows() == 4);
+        assert(t1.rows() == 4);
 
         assert(t1.update(1,2, "York"));
         assert(t1.select_record(1).getValue(2).equals("York"));
 
         // Bulk Update
-        Table t2 = new Table(c0,c1,c2);
-        assert(t2.getColumns() == 3);
+        Table t2 = new Table("t2",c0,c1,c2);
+        assert(t2.columns() == 3);
 
         // Add records
         Record r1_0 = new Record("Angela", "Walker", "Bristol");
@@ -307,24 +337,24 @@ public class Table {
         Column c1 = new Column("Last_Name");
         Column c2 = new Column("County");
 
-        Table t1 = new Table(c0,c1,c2);
-        assert (t1.getColumns() == 3);
+        Table t1 = new Table("t1",c0,c1,c2);
+        assert (t1.columns() == 3);
 
         Record r0 = new Record("Angela", "Walker", "Bristol");
         Record r1 = new Record("Tom", "Olson", "London");
         Record r2 = new Record("Paul", "Hudson", "Manchester");
         Record r3 = new Record("Hannah", "Powell", "Essex");
         t1.insert(r0, r1, r2, r3);
-        assert (t1.getRows() == 4);
+        assert (t1.rows() == 4);
 
         // Delete single record
         assert(t1.delete(1) == r1);
-        assert(t1.getRows() == 3);
+        assert(t1.rows() == 3);
 
         // Delete Multiple Records
-        Table t2 = new Table(c0,c1,c2);
+        Table t2 = new Table("t2",c0,c1,c2);
         t2.insert(r0,r1,r2,r3);
-        assert(t2.getRows() == 4);
+        assert(t2.rows() == 4);
 
         Set<Integer> keys = new HashSet<>();
         keys.add(1);
@@ -333,13 +363,13 @@ public class Table {
         Set<Record> deleted = t2.delete(keys);
         assert(deleted.size() == 2);
         assert(deleted.contains(r1) && deleted.contains(r2));
-        assert(t2.getRows() == 2);
+        assert(t2.rows() == 2);
 
         // Delete Multiple Records with invalid keys
         keys.clear();
         deleted.clear();
 
-        Table t3 = new Table(c0,c1,c2);
+        Table t3 = new Table("t3",c0,c1,c2);
         t3.insert(r0,r1,r2,r3);
 
         keys.add(-2);
@@ -348,7 +378,7 @@ public class Table {
         deleted = t3.delete(keys);
         assert(deleted.size() == 1);
         assert(deleted.contains(r2));
-        assert(t3.getRows() == 3);
+        assert(t3.rows() == 3);
     }
 
     public static void test_alter_table_append_columns() {
@@ -356,13 +386,13 @@ public class Table {
         Column c1 = new Column("Last_Name");
         Column c2 = new Column("County");
 
-        Table t1 = new Table(c0, c1, c2);
-        assert(t1.getColumns() == 3);
+        Table t1 = new Table("t1", c0, c1, c2);
+        assert(t1.columns() == 3);
 
         Column c3 = new Column("Col_3");
         Column c4 = new Column("Col_4");
         t1.appendColumns(c3,c4);
-        assert(t1.getColumns() == 5);
+        assert(t1.columns() == 5);
     }
 
     public static void test_alter_table_remove_columns() {
@@ -370,20 +400,20 @@ public class Table {
         Column c1 = new Column("Last_Name");
         Column c2 = new Column("County");
 
-        Table t1 = new Table(c0, c1, c2);
-        assert(t1.getColumns() == 3);
+        Table t1 = new Table("t1", c0, c1, c2);
+        assert(t1.columns() == 3);
 
         Record r0 = new Record("Angela", "Walker", "Bristol");
         Record r1 = new Record("Tom", "Olson", "London");
         Record r2 = new Record("Paul", "Hudson", "Manchester");
         Record r3 = new Record("Hannah", "Powell", "Essex");
         t1.insert(r0,r1,r2,r3);
-        assert(t1.getRows() == 4);
+        assert(t1.rows() == 4);
 
         // Remove middle column
         t1.dropColumn(1);
-        assert(t1.getColumns() == 2);
-        assert(t1.getRows() == 4);
+        assert(t1.columns() == 2);
+        assert(t1.rows() == 4);
 
         // Check that records are altered as well
         for(int i=0; i<4; i++) {
