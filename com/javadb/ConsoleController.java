@@ -76,10 +76,7 @@ public class ConsoleController {
     }
 
     // Unit testing
-
     private static void test() {
-        DbFileManager fileManager = new DbFileManager();
-
         Column c0 = new Column("First_Name");
         Column c1 = new Column("Last_Name");
         Column c2 = new Column("County");
@@ -96,7 +93,6 @@ public class ConsoleController {
         ConsoleController consoleController = new ConsoleController();
         ConsoleView consoleView= new ConsoleView();
         consoleController.setConsoleView(consoleView);
-
         consoleController.printTable(t1);
     }
 
