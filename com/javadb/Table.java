@@ -36,8 +36,8 @@ public class Table {
     /**
      * The underlying Map that stores the records cannot be exposed directly.
      * A stream of key/value pairs is prefered over a deep copy, for ease of
-     * use and efficiency.
-     * @return A stream of Map.Entry<Integer, Record>
+     * use and efficiency in large tables.
+     * @return A stream of map entries.
      */
     public Stream<Map.Entry<Integer, Record>> getRows() {
         return records.entrySet().stream();
