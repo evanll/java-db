@@ -1,26 +1,28 @@
 package com.javadb;
 
 import java.io.*;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
 
 /**
  * Responsible for storing and loading tables from disk.
  */
-public class DbFileManager {
+public class StorageEngine {
 
     /**
      * Loads a table from a CSV file.
-     * @param tableName Table to be loaded
+     * @param file Table file to be loaded
      * @return A Table object
      */
-    public static Table loadTableFile(String tableName) {
+    public Table loadTableFile(File file) {
         Table t = null;
 
-        try(BufferedReader br = new BufferedReader(new FileReader(tableName + ".csv"))) {
+        try(BufferedReader br = new BufferedReader(new FileReader(file))) {
             // Handle first line as header, containing column name
             String line = br.readLine();
             String[] header;
             if (line != null) {
-                header = CSV.parseCSVline(line);
+                header = CSVutils.parseCSVline(line);
 
                 Column[] columns = new Column[header.length];
                 for (int i = 0; i < header.length; i++) {
@@ -31,12 +33,17 @@ public class DbFileManager {
                         columns[i] = new Column(header[i]);
                     }
                 }
+
+                // Create a new table
+                String tableName = file.getName();
+                tableName = tableName.substring(0, tableName.lastIndexOf("."));
+
                 t = new Table(tableName, columns[0], columns);
 
                 // Rest lines will be handled as table records
                 String values[];
                 while ((line = br.readLine()) != null) {
-                    values = CSV.parseCSVline(line);
+                    values = CSVutils.parseCSVline(line);
                     Record r = new Record(values);
                     t.insert(r);
                 }
@@ -54,21 +61,21 @@ public class DbFileManager {
      * Saves a table to disk in CSV format.
      * @param t Table to be saved as CSV file.
      */
-    public static void saveTable(Table t) {
-        try(BufferedWriter bw = new BufferedWriter(new FileWriter(t.getName() + ".csv"))) {
+    public void saveTable(Table t, File file) {
+        try(BufferedWriter bw = new BufferedWriter(new FileWriter(file,true))) {
             // Write columns
             Column[] columns = t.getColumns();
             String[] columnNames = new String[t.columns()];
             for(int i = 0; i< t.columns(); i++) {
                 columnNames[i] = columns[i].getName();
             }
-            bw.write(CSV.generateCSVRecord(columnNames));
+            bw.write(CSVutils.generateCSVRecord(columnNames));
 
             // Write table records
             t.getRows().forEach(entry -> {
                 Record r = entry.getValue();
                 try {
-                    bw.write(CSV.generateCSVRecord(r.getValues()));
+                    bw.write(CSVutils.generateCSVRecord(r.getValues()));
                 } catch (Exception e) {
                     throw new Error("Unable to create table file.");
                 }
@@ -81,7 +88,7 @@ public class DbFileManager {
     // Unit testing
 
     private static void test() {
-        DbFileManager fileManager = new DbFileManager();
+        StorageEngine storageEngine = new StorageEngine();
 
         Column c0 = new Column("First_Name", Constraint.PRIMARY_KEY);
         Column c1 = new Column("Last_Name");
@@ -99,11 +106,11 @@ public class DbFileManager {
         t1.insert(r0,r1,r2,r3);
 
         // Save table
-        saveTable(t1);
+        Path path = FileSystems.getDefault().getPath("Databases","SaveLoadTest", t1.getName() + ".csv");
+        storageEngine.saveTable(t1,path.toFile());
 
         // Load table
-        Table t1_loaded = loadTableFile("t1");
-        // Assert tables are the same
+        Table t1_loaded = storageEngine.loadTableFile(path.toFile());
     }
 
     public static void main(String[] args) {

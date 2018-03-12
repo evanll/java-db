@@ -9,7 +9,7 @@ import java.util.List;
  * a specific CSV standard. It's build for the specific requirements
  * of the java-db project.
  */
-public class CSV {
+public class CSVutils {
     private static final char DELIMITER_CHAR = ',';
     private static final char QUOTES_CHAR = '"';
     // Todo: \n \r\n
