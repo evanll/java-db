@@ -77,7 +77,7 @@ public class ConsoleController {
 
     // Unit testing
     private static void test() {
-        Column c0 = new Column("First_Name");
+        Column c0 = new Column("First_Name", Constraint.PRIMARY_KEY);
         Column c1 = new Column("Last_Name");
         Column c2 = new Column("County");
 

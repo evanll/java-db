@@ -13,6 +13,7 @@ public class Table {
     private String name;
     private List<Column> columns;
     private Map<Integer, Record> records;
+    private boolean hasPK;
 
     Table(String name, Column... columns) {
         this.name = name;
@@ -118,7 +119,7 @@ public class Table {
 
     public boolean insert(Record r) {
         //check if record is compatible
-        if ( r.size() != columns.size()) {
+        if (isViolation(r)) {
             return false;
         }
 
@@ -191,15 +192,26 @@ public class Table {
         return results;
     }
 
-    // TODO: Temporary. Fix column identation, move to view
-    public void printTable() {
-        for(Column c : columns) {
-            System.out.print(c.toString() + ",");
+    private boolean isViolation(Record r) {
+        // Checks if record has the same number of fields as columns
+        if ( r.size() != columns.size()) {
+            return false;
         }
-        System.out.println();
-        for (Map.Entry<Integer, Record> pair : records.entrySet()) {
-            pair.getValue().printRow();
+
+        // Loops through columns and checks if any constraints are violated
+        boolean violation = false;
+        int i =0;
+        while (i < columns.size() && !violation) {
+            EnumSet<Constraint> constraintSet= columns.get(i).getConstraints();
+
+            for (Constraint constraint : constraintSet) {
+                violation = constraint.isViolated(records.entrySet().stream(), r, i);
+            }
+
+            i++;
         }
+
+        return violation;
     }
 
     // Unit Testing
