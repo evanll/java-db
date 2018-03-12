@@ -176,7 +176,7 @@ public class CSV {
         String val4 = "I like pizza, hamburger and tortilla.";
         String val5 = "Not much to say\n I love cats!";
 
-        String[] values = new String[4];
+        String[] values = new String[6];
         values[0] = val0;
         values[1] = val1;
         values[2] = val2;

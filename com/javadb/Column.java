@@ -2,6 +2,7 @@ package com.javadb;
 
 import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -23,6 +24,10 @@ public class Column {
         return name;
     }
 
+    public boolean isPK() {
+        return isPK;
+    }
+
     public void setName(String name) {
         this.name = name;
     }
@@ -38,10 +43,7 @@ public class Column {
      */
     private EnumSet<Constraint> addConstraints(Constraint... constraints) {
         EnumSet<Constraint> constraintSet = EnumSet.noneOf(Constraint.class);
-
-        for(Constraint constraint : constraints) {
-                constraintSet.add(constraint);
-        }
+        constraintSet.addAll(Arrays.asList(constraints));
 
         return constraintSet;
     }
@@ -49,5 +51,16 @@ public class Column {
     @Override
     public String toString() {
         return name;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        Column column = (Column) o;
+
+        return Objects.equals(name, column.name);
     }
 }

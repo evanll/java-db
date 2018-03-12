@@ -13,7 +13,7 @@ public class DbFileManager {
      * @return A Table object
      */
     public static Table loadTableFile(String tableName) {
-        Table t = new Table(tableName);
+        Table t = null;
 
         try(BufferedReader br = new BufferedReader(new FileReader(tableName + ".csv"))) {
             // Handle first line as header, containing column name
@@ -21,18 +21,25 @@ public class DbFileManager {
             String[] header;
             if (line != null) {
                 header = CSV.parseCSVline(line);
-                for(String colName : header) {
-                    Column c = new Column(colName);
-                    t.appendColumns(c);
-                }
-            }
 
-            // Rest lines will be handled as table records
-            String values[];
-            while ((line = br.readLine()) != null) {
-                values = CSV.parseCSVline(line);
-                Record r = new Record(values);
-                t.insert(r);
+                Column[] columns = new Column[header.length];
+                for (int i = 0; i < header.length; i++) {
+                    // Use first column as PK
+                    if (i == 0) {
+                        columns[i] = new Column(header[i], Constraint.PRIMARY_KEY);
+                    } else {
+                        columns[i] = new Column(header[i]);
+                    }
+                }
+                t = new Table(tableName, columns[0], columns);
+
+                // Rest lines will be handled as table records
+                String values[];
+                while ((line = br.readLine()) != null) {
+                    values = CSV.parseCSVline(line);
+                    Record r = new Record(values);
+                    t.insert(r);
+                }
             }
         } catch (FileNotFoundException e) {
             throw new Error("Table file not found.");
@@ -76,7 +83,7 @@ public class DbFileManager {
     private static void test() {
         DbFileManager fileManager = new DbFileManager();
 
-        Column c0 = new Column("First_Name");
+        Column c0 = new Column("First_Name", Constraint.PRIMARY_KEY);
         Column c1 = new Column("Last_Name");
         Column c2 = new Column("County");
 
@@ -96,8 +103,7 @@ public class DbFileManager {
 
         // Load table
         Table t1_loaded = loadTableFile("t1");
-
-        //TODO: Assert tables are the same
+        // Assert tables are the same
     }
 
     public static void main(String[] args) {

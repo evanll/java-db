@@ -4,29 +4,29 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 /**
- * Defines the available column constraints and implements the Violate interface for each of them.
+ * Defines the available column constraints and implements the Violates interface for each of them.
  */
 public enum Constraint implements Violates {
     NOT_NULL {
         @Override
-        public boolean isViolated(Stream<Map.Entry<Integer, Record>> s, Record newRecord, int colIndex) {
-            return newRecord.getValue(colIndex).equals("");
+        public boolean isViolated(Stream<Map.Entry<String, Record>> s, String newValue, int colIndex) {
+            return newValue.equals("");
         }
     },
     UNIQUE {
         @Override
-        public boolean isViolated(Stream<Map.Entry<Integer, Record>> s, Record newRecord, int colIndex) {
+        public boolean isViolated(Stream<Map.Entry<String, Record>> s, String newValue, int colIndex) {
             return s.anyMatch(entry -> {
                 Record r = entry.getValue();
-                return r.getValue(colIndex).equals(newRecord.getValue(colIndex));
+                return r.getValue(colIndex).equals(newValue);
             });
         }
     },
     // PK implies UNIQUE and NOT NULL.
     PRIMARY_KEY {
         @Override
-        public boolean isViolated(Stream<Map.Entry<Integer, Record>> s, Record newRecord, int colIndex) {
-            return NOT_NULL.isViolated(s, newRecord, colIndex) || UNIQUE.isViolated(s, newRecord, colIndex);
+        public boolean isViolated(Stream<Map.Entry<String, Record>> s, String newValue, int colIndex) {
+            return NOT_NULL.isViolated(s, newValue, colIndex) || UNIQUE.isViolated(s, newValue, colIndex);
         }
     }
 }

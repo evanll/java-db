@@ -4,8 +4,8 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 /**
- * An interface that helps handle column constraints.
+ * An interface for handling column constraints.
  */
 public interface Violates {
-    boolean isViolated(Stream<Map.Entry<Integer, Record>> s, Record newRecord, int colIndex);
+    boolean isViolated(Stream<Map.Entry<String, Record>> s, String newValue, int colIndex);
 }
