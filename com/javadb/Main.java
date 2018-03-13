@@ -14,7 +14,7 @@ public class Main {
         StorageEngine.main(testArgs);
         CSVutils.main(testArgs);
         if (ea) {System.out.println("All tests passed.\n");}
-        System.out.println("Table load, save, printing:\n");
-        HelloDB.main(testArgs);
+        System.out.println("Table printing:\n");
+        ConsoleController.main(testArgs);
     }
 }
