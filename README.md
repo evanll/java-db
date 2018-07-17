@@ -49,4 +49,4 @@ Unit testing is included for all aforementioned functionality.
 ## License
 Written by Evan Lalopoulos <evan.lalopoulos.2017@my.bristol.ac.uk>    
 Copyright (C) - All rights reserved.  
-Unauthorized copying of this file is strictly prohibited.  
+Unauthorized copying is strictly prohibited.  
